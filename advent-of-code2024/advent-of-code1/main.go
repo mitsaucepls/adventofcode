@@ -23,8 +23,11 @@ func main() {
         return right[i] < right[j]
     })
 
-    result := calculateDifference(left, right)
-    fmt.Println(result)
+    diffResult := calculateDifference(left, right)
+    fmt.Printf("The difference score is: %d\n", diffResult)
+
+    simResult := calculateSimScore(left, right)
+    fmt.Printf("The similar score is: %d\n", simResult)
 
     // fmt.Println(left)
     // fmt.Println(right)
@@ -80,4 +83,23 @@ func calculateDifference(left []uint, right []uint) uint {
         result += diff
     }
     return result
+}
+
+func calculateSimScore(left []uint, right []uint) uint {
+    var result uint
+    occurrenceMap := createOccurrenceMap(right)
+    for _, leftNum := range left {
+        occurrence := occurrenceMap[leftNum]
+        result += leftNum * occurrence
+    }
+
+    return result
+}
+
+func createOccurrenceMap(right []uint) map[uint]uint {
+    var occurrenceMap = make(map[uint]uint)
+    for _, occurance := range right {
+        occurrenceMap[occurance]++
+    }
+    return occurrenceMap
 }
