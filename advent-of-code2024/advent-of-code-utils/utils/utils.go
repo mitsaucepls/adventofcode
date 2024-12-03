@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 func GetInput(day uint, year uint) (string, error) {
@@ -41,3 +42,20 @@ func GetInput(day uint, year uint) (string, error) {
 
 	return string(body), nil
 }
+
+func ParseStrSlice2IntSlice(strSlice []string) ([]int, error) {
+    intSlice := make([]int, len(strSlice))
+
+    for i, str := range strSlice {
+        parsedStr, err := strconv.Atoi(str)
+        if err != nil {
+            return nil, err
+        }
+
+        intSlice[i] = parsedStr
+
+    }
+
+    return intSlice, nil
+}
+
