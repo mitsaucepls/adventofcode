@@ -117,13 +117,52 @@ func printerRules(rules [][]int, updates [][]int) []int {
             if !(index1 < index2) {
                 isCorrect = false
             }
-            fmt.Printf("Rule: %v is: %t with those indicies: %d   %d\n", rule, isCorrect, index1, index2)
+            // fmt.Printf("Rule: %v is: %t with those indicies: %d   %d\n", rule, isCorrect, index1, index2)
         }
         if isCorrect {
+            // results = append(results, update[len(update) / 2])
+        } else {
+            for !isCorrect {
+                for _, rule := range rules {
+                    index1 := getIndex(update, rule[0])
+                    index2 := getIndex(update, rule[1])
+                    if index1 == -1 || index2 == -1 {
+                        continue
+                    }
+                    moveElementToIndex(update, index2, index1)
+                }
+                isCorrect = true
+                for _, rule := range rules {
+                    index1 := getIndex(update, rule[0])
+                    index2 := getIndex(update, rule[1])
+                    if index1 == -1 || index2 == -1 {
+                        continue
+                    }
+                    if !(index1 < index2) {
+                        isCorrect = false
+                    }
+                }
+                if isCorrect {
+                    break
+                }
+            }
+            fmt.Printf("Incorrect update is now: %v\n", update)
             results = append(results, update[len(update) / 2])
         }
     }
     return results
+}
+
+func moveElementToIndex(array []int, from int, to int) {
+    for i := from; i < to; i++ {
+        swapElements(array, i, i+1)
+    }
+}
+
+func swapElements(array []int, from int, to int) {
+    tmp := array[to]
+    array[to] = array[from]
+    array[from] = tmp
 }
 
 func getIndex(array []int, toSearch int) int {
