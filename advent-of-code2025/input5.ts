@@ -111,5 +111,5 @@ function isInRange(range: Range, rower: number): boolean {
 
 
 
-// console.log(one(puzzle_input))
+console.log(one(puzzle_input))
 console.log(two(puzzle_input))

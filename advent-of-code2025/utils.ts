@@ -5,7 +5,7 @@ import { env } from "process";
 export async function getInput(day: number, year: number): Promise<string> {
 
   const dir = "inputs"
-  const file_path = `./${ dir }/input${ day }`
+  const file_path = `./${ dir }/input${ day }.txt`
   if (existsSync(file_path)) {
     return readFileSync(file_path, "utf8")
   }

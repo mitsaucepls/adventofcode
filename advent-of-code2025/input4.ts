@@ -103,5 +103,5 @@ function check_adjacent_slots(shelf_map: string[][], coordinate: Coordinate): nu
   return hit
 }
 
-// console.log(one(puzzle_input))
+console.log(one(puzzle_input))
 console.log(two(puzzle_input))
