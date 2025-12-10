@@ -114,28 +114,30 @@ function calculate_polygon_edges(points: Point[]): Point[] {
   return green_edges
 }
 
-type IntersectCache = {
-  point: Point,
-  intersect: boolean
+const INTERSECT_CACHE_LIMIT = 16_000_000
+const intersect_cache: Map<string, boolean> = new Map()
+
+function cacheKey(point: Point): string {
+  return `${point.x},${point.y}`
 }
 
-const intersect_cache: IntersectCache[] = []
+function setCacheWithLimit(key: string, value: boolean) {
+  if (intersect_cache.size >= INTERSECT_CACHE_LIMIT) {
+    // Simple eviction to stop the Map from growing without bound.
+    intersect_cache.clear()
+  }
+  intersect_cache.set(key, value)
+}
+
 function point_in_polygon(point: Point, polygon: Point[]): boolean {
   // console.log("=== point_in_polygon debug ===")
   // console.log("Test point:", point)
   // if (polygon.includes(point)) {
-  for (let i = 0; i < intersect_cache.length; i++) {
-    if (intersect_cache[i].point.x === point.x && intersect_cache[i].point.y === point.y) {
-      return intersect_cache[i].intersect
-    }
-  }
-  if (polygon.some(p => p.x === point.x && p.y === point.y)) {
-    // console.log("Point is an edge")
-    intersect_cache.push({ point, intersect: true })
-    return true
-  }
+  const key = cacheKey(point)
+  const hit = intersect_cache.get(key)
+  if (hit !== undefined) return hit
   const { x, y } = point;
-  let inside = false;
+  let inside = false
   let j = polygon.length - 1
 
 
@@ -143,8 +145,8 @@ function point_in_polygon(point: Point, polygon: Point[]): boolean {
   // if the ray crosses an odd number of edges its inside
   // if the ray crosses an even number of edges its outside
   for (let i = 0; i < polygon.length; i++) {
-    const { x: x1, y: y1 } = polygon[i];
-    const { x: x2, y: y2 } = polygon[j];
+    const { x: x1, y: y1 } = polygon[i]
+    const { x: x2, y: y2 } = polygon[j]
 
     // console.log(`\nEdge ${j} -> ${i}`, { x1, y1, x2, y2 })
 
@@ -157,12 +159,12 @@ function point_in_polygon(point: Point, polygon: Point[]): boolean {
     // X(t) = x1 + t * (x2 - x1)
     const xt = x1 + t * (x2 - x1)
     // console.log("  xt:", `${x1} + ${t} * (${x2} - ${x1})`, "=", xt)
-    const intersect = horizontal_fit && x < xt;
+    const intersect = horizontal_fit && x < xt
 
     // console.log("  intersect:", intersect, "for x =", x)
 
     if (intersect) {
-      inside = !inside;
+      inside = !inside
       // console.log("  -> toggling inside, now:", inside)
     } else {
       // console.log("  -> no toggle, inside stays:", inside)
@@ -173,8 +175,8 @@ function point_in_polygon(point: Point, polygon: Point[]): boolean {
   // console.log("Final inside:", inside)
   // console.log("=== end point_in_polygon debug ===")
 
-  intersect_cache.push({ point, intersect: inside })
-  return inside;
+  setCacheWithLimit(key, inside)
+  return inside
 }
 
 
@@ -187,10 +189,14 @@ function two(puzzle_input: string): number {
     points.push({ x: Number(nums[0]), y: Number(nums[1]) })
   }
   const new_points = calculate_polygon_edges(points)
+  for (const point of new_points) {
+    setCacheWithLimit(cacheKey(point), true)
+  }
 
   const pointAreaMapCache: PointAreaMap[] = []
   for (let i = 0; i < points.length; i++) {
-    console.log(points.length - i - 1)
+    console.log("i:", points.length - i - 1)
+    console.log("cache size:", intersect_cache.size)
     for (let j = i + 1; j < points.length; j++) {
       const pointA = points[i]
       const pointB = points[j]
@@ -200,7 +206,7 @@ function two(puzzle_input: string): number {
       if (edges.every((point) => {
         // console.log(point)
         // console.log(point_in_polygon(point, new_points))
-        return point_in_polygon(point, new_points)
+        return point_in_polygon(point, points)
       })) {
         const area = area_calculation(pointA, pointB)
         pointAreaMapCache.push({ pointA, pointB, area })
@@ -229,5 +235,5 @@ function two(puzzle_input: string): number {
   return pointAreaMapCache[pointAreaMapCache.length - 1].area
 }
 
-// console.log(one(puzzle_input))
+console.log(one(puzzle_input))
 console.log(two(puzzle_input))
